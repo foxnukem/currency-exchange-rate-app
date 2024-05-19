@@ -1,73 +1,52 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+## Опис
+Це сервіс з АРІ, який дозволить:
+- дізнатись поточний курс долара (USD) у гривні (UAH)
+- підписати емейл на отримання інформації по зміні курсу.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Запуск
+Можливий запуск з допомогою Docker, для цього присутній окремо Dockerfile для самого застосунку та конфігурація docker-compose, яка також містить конфігурацію для підняття PostgreSQL
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Стек
+- Node.js
+- Nest.js - основа застосунку, яка у багато чому схожа на Spring Framework та Angular 2+ :)
+- PostgreSQL - СКБД
+- nodemailer - бібліотека для надсилання листів
+- TypeORM - ORM 
+- Cron - для запланованих дій (розсилка у цьому випадку)
 
-## Description
+## Базова структура
+### Застосунок поділено на три основні частини: 
+- *Currency* - взаємодія з API сервісу, який надає інформацію про курс валют. У цьому випадку використано Coinbase, може бути використаний будь-який доступний без зміни інтерфейсу сервісу, який надає інфо про курс валют.
+- *EmailListManagement* - частина, яка відповідає за керування та збереження е-мейлів юзерів, тут було використано елементи TypeORM, що зробити можливим збереження адрес у БД. 
+- *EmailCommunication* - частина, яка інкапсулює в собі логіку надсилання е-мейлів. Було реалізовано власний інтерфейс взаємодії із nodemailer, який уже використано у сервісі, який збирає повідомлення та робить росилку. 
+Інфраструктурною є частина, що знаходиться у директорії database. Вона відповідає за підключення до БД.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Змінні оточення
+Конфігурація задається через файл .env, який має лежати у корені проєкту. 
 
-## Installation
+### Змінні, що стосуються серверу
+- *PORT* - порт сервера node.js.
+- *BASE_URL*=/api - базова частина URL API самого застосунку.
+- *LOCAL_PORT* - порт, за яким доступний застосунок, коли він запущений через Docker.
 
-```bash
-$ npm install
-```
+### Змінні, які стосуються БД
+- *POSTGRES_HOST*=localhost - шлях для доступу до БД 
+- *POSTGRES_DATABASE*=currency-service - назва БД у СКБД
+- *POSTGRES_LOCAL_PORT* - порт, за яким СКБД доступна для підключення ззовні Docker контейнера
+- *POSTGRES_DOCKER_PORT* - порт СКБД, до якого підключається сам застосунок для доступу в БД
+- *POSTGRES_USER* - назва користувача СКБД, яка використовується застосунком для доступу до БД
+- *POSTGRES_PASSWORD* - пароль користувача СКБД, який використовується застосунком для доступу до БД
 
-## Running the app
+### Змінні, які стосуються API отримання інформації про курс валют
+- *COINBASE_API_URL*=https://api.coinbase.com/v2/prices - основна частина URL для доступу до API Coinbase
+- *COINBASE_API_KEY* - ключ доступу до API Coinbase 
+- *CURRENCY_FROM_TO*=USD-UAH - частина URL, яка відповідає за пару валют обміну
+- *CURRENCY_RATE_ACTION*=buy - частина URL, яка відповідає за дію обміну між валютами (buy, sell, spot)
 
-```bash
-# development
-$ npm run start
+### Змінні, які стосуються частини, яка відповідає за надсилання листів
+- *SEND_EMAIL_FROM* - е-мейл, з якого надсилається лист
+- *SEND_EMAIL_HOST* - хост-адреса сервісу для надсилання пошти
+- *SEND_EMAIL_PORT* - порт поштового серверу для надсилання пошти
+- *SEND_EMAIL_AUTH_USER* - назва користувача на сервісі для надсилання пошти (тут був використаний mailtrap.io)
+- *SEND_EMAIL_AUTH_PASSWORD* - пароль користувача на сервісі для надсилання пошти
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
